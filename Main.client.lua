@@ -14,21 +14,24 @@ local root = character:WaitForChild("HumanoidRootPart")
 -- BALL
 local ball = workspace:WaitForChild(BALL_NAME)
 
+-- MODULE
+local ZoneDetection = require(script.ZoneDetection)
+
 --------------------------------------------------
 -- ZONE VISUELLE
 --------------------------------------------------
 local zone = Instance.new("Part")
 zone.Shape = Enum.PartType.Ball
 zone.Size = Vector3.new(ZONE_RADIUS * 2, ZONE_RADIUS * 2, ZONE_RADIUS * 2)
-zone.Transparency = 0.7
-zone.Color = Color3.fromRGB(0, 170, 255)
-zone.Material = Enum.Material.ForceField
 zone.Anchored = true
 zone.CanCollide = false
+zone.Transparency = 0.7
+zone.Material = Enum.Material.ForceField
+zone.Color = Color3.fromRGB(0, 170, 255)
 zone.Parent = workspace
 
 --------------------------------------------------
--- UI MESSAGE
+-- UI
 --------------------------------------------------
 local gui = Instance.new("ScreenGui", player.PlayerGui)
 local label = Instance.new("TextLabel", gui)
@@ -36,32 +39,17 @@ local label = Instance.new("TextLabel", gui)
 label.Size = UDim2.fromScale(0.4, 0.1)
 label.Position = UDim2.fromScale(0.3, 0.8)
 label.BackgroundTransparency = 0.3
-label.BackgroundColor3 = Color3.new(0,0,0)
-label.TextColor3 = Color3.new(1,0,0)
 label.TextScaled = true
+label.TextColor3 = Color3.new(1, 0, 0)
 label.Text = ""
 
 --------------------------------------------------
--- LOGIQUE
+-- LOOP
 --------------------------------------------------
 RunService.RenderStepped:Connect(function()
-	-- zone suit le joueur
 	zone.Position = root.Position
 
-	local distance = (ball.Position - root.Position).Magnitude
-	if distance > ZONE_RADIUS then
-		label.Text = ""
-		return
-	end
-
-	-- direction balle → joueur
-	local ballVelocity = ball.AssemblyLinearVelocity
-	local directionToPlayer = (root.Position - ball.Position).Unit
-
-	local dot = ballVelocity.Unit:Dot(directionToPlayer)
-
-	-- si la balle va vers le joueur
-	if dot > 0.8 then
+	if ZoneDetection.IsBallDangerous(ball, root, ZONE_RADIUS) then
 		label.Text = "⚠️ CLIQUE MAINTENANT"
 	else
 		label.Text = ""
